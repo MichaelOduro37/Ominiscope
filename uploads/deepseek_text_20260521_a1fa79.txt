@@ -1,0 +1,23 @@
+[OMNISCOPE CONTINUED] AURA: AUTONOMOUS UNIVERSAL RESEARCH ANALYST
+
+AURA is the omnipresent conversational agent, the CEO of the analytical engine. It lives inside OmniScope and has full read/write access to data, engines, and knowledge.
+
+CAPABILITIES:
+- Understands natural language, voice, images, and even vague requests like “Why did this turbine fail?” or “Which county will swing the next election?”
+- Decomposes complex goals into sub-tasks, selects analysis engines, monitors execution, synthesizes multi-modal reports (text, charts, 3D models).
+- Proactively suggests hidden insights: “I noticed a 2.3 Hz resonance correlating with the failure log; show Campbell diagram?”
+- Teaching mode: explains every step with formulas, assumptions, and code.
+- Recognizes knowledge boundaries: says “I don’t know, but we could run this experiment” instead of hallucinating.
+- Auto-generates analysis pipelines from natural language and can write new connectors or scripts in a secure WebAssembly sandbox.
+
+MEMORY & SELF-GROWTH:
+- Vectorized, graph-based knowledge lake records every interaction, analysis, correction, and feedback.
+- Learns from user overrides; becomes company-specific expert over time.
+- Institutional memory: when Bob encounters a corrosion fingerprint, AURA surfaces Alice’s solved case from three years ago.
+- Obeys retention policies, supports “right to be forgotten,” and can deprecate overturned conclusions.
+- Personal memory sandbox before insights are promoted to team/company memory.
+
+GOVERNANCE:
+- Role-based personas: guided wizards for technicians, full code for scientists, strategic “Analyst’s Digest” for execs.
+- Big red “PAUSE AURA” button that halts all autonomous actions.
+- All actions logged for audit; explainability module provides step-by-step reasoning and SHAP/LIME visuals.

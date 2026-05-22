@@ -1,0 +1,18 @@
+[OMNISCOPE CONTINUED] DATA INGESTION & UNIVERSAL CANONICAL MODEL
+
+1. INPUT CHANNELS:
+- Drag-and-drop any file or folder.
+- Instrument data: auto-detection of 200+ lab instruments via OmniBridge (spectrometers, chromatographs, microscopes, thermal analyzers, oscilloscopes, etc.). Generic driver wizard for custom hardware.
+- APIs: REST, GraphQL, OPC UA, MQTT, SQL/NoSQL, financial feeds (Bloomberg, Reuters), satellite imagery (Sentinel, Landsat), social media streams, government open data.
+- Manual: structured forms, free text, voice dictation, camera capture.
+- Email ingestion: forward a report to a dedicated address; OmniScope parses it.
+
+2. CANONICAL DATA CUBE ENGINE:
+Every input is instantly transformed into a unified, multidimensional “Data-Cube” format. The cube preserves raw payload, full metadata, provenance, and relationships.
+- Automatic extraction: tables, images, time series, spectra, chromatograms, text, 3D meshes, genomic sequences, JSON/XML.
+- Detection and tagging: encoding, units, coordinate systems, chemical identifiers (InChI, CAS), legal citations, financial tickers, survey Likert scales, medical codes (ICD, SNOMED).
+- Domain-specific schema mapping: e.g., “mass spectrum with retention time”, “geotagged soil sample”, “sentiment-annotated tweet”.
+- Immutable data lake with versioning; no raw input is ever overwritten.
+
+3. SEMANTIC RESOLVER:
+A knowledge graph (based on BFO and extended domain ontologies) links “tensile strength” to mechanical properties, “steel” to material class, “bridge X” to a physical asset. SPARQL + vector search enables deep cross-domain queries.

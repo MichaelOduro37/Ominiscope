@@ -1,0 +1,12 @@
+BUILD OMNISCOPE: UNIVERSAL ANALYSIS OPERATING SYSTEM (WEB PLATFORM)
+
+TYPE: Cloud-hosted Progressive Web App with optional on-premises deployment, plus a lightweight desktop agent (OmniBridge) for instrument connectivity and a mobile PWA companion.
+USERS: Every employee of a company operating in ALL fields (science, engineering, medicine, finance, politics, law, agriculture, arts, logistics, defense, etc.).
+
+CORE VISION: OmniScope is not a collection of tools; it is a single, AI-orchestrated operating system for the entire enterprise. It functionally replaces and combines the capabilities of every analysis software that exists—MATLAB, SPSS, Tableau, Ansys, MassLynx, NVivo, Bloomberg Terminal, TensorFlow, and every domain-specific analyzer. It is the company’s central nervous system for data, analysis, communication, and decision-making.
+
+UNIVERSAL ACCESS: The platform is a responsive website. Every employee logs in via browser (desktop, tablet, mobile) and is instantly in the same shared workspace. No installation for core functionality. The interface adapts to roles: an executive sees strategic dashboards, a lab technician sees guided instrument workflows, a field worker sees a voice-first mobile interface.
+
+OFFLINE & INSTRUMENT BRIDGE: The optional OmniBridge agent runs on Windows/Linux/Mac lab PCs and securely connects serial/USB/GPIB instruments to the cloud platform via WebSocket tunnel. The mobile PWA works offline, capturing photos, voice notes, and data, then syncs when online.
+
+ARCHITECTURE: Microservices on Kubernetes, multi-region active-active, WebRTC/CRDT for real-time collaboration, WebAssembly sandboxes for running untrusted analysis scripts, and GPU node pools for ML. The AI assistant (AURA) lives server-side with fast edge inference. Everything is encrypted end-to-end.
