@@ -1,0 +1,21 @@
+[OMNISCOPE CONTINUED] ANALYSIS ENGINE CATALOG (EVERY FIELD)
+
+The platform includes native, sandboxed analysis engines for all domains. They can be chained arbitrarily. AURA selects and orchestrates them.
+
+3.1 MATERIAL & CHEMICAL: Spectrum deconvolution (MS, NMR, IR, Raman, XRD, XRF), chromatogram integration, microscopy particle analysis, thermal curve modeling, crystallography, chemometrics (PCA, SIMCA, PLS).
+
+3.2 ENGINEERING: FEA (structural, thermal, fluid), CFD, circuit simulation (SPICE), multibody dynamics, control system analysis (Bode, root locus), vibration FFT, acoustics.
+
+3.3 LIFE SCIENCES: Genomics alignment & variant calling, proteomics mass-spec ID, medical imaging (DICOM) segmentation & radiomics, ECG/EEG event detection, epidemiological SIR modeling, drug interaction checking.
+
+3.4 FINANCE & ECONOMICS: Real-time pricing, options Greeks, VaR, portfolio optimization, technical analysis backtesting, financial statement decomposition, ARIMA/GARCH econometrics, supply chain optimization.
+
+3.5 POLITICS & SOCIAL SCIENCE: Sentiment/stance detection, election polling MRP, geopolitical risk indexing (GDELT), social network analysis, qualitative interview coding (NVivo-style).
+
+3.6 ENVIRONMENT & AGRI: Satellite/drone NDVI, climate model NetCDF analysis, seismic hypocenter location, water quality, soil spectral analysis.
+
+3.7 HUMANITIES & ARTS: Stylometry, music chord recognition, art pigment spectral matching, legal contract clause extraction.
+
+3.8 GENERAL-PURPOSE: Full R-like statistics, AutoML (XGBoost to Transformers), deep vision/NLP, time series forecasting (Prophet, N-BEATS), causal inference, optimization solvers.
+
+All engines are hot-swappable plugins available from an in-app marketplace. Third-party developers can publish domain packs.

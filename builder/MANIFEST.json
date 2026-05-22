@@ -1,0 +1,48 @@
+﻿{
+  "project": "OmniScope",
+  "description": "Machine-readable manifest for automated builder. Prioritize Data-Cube, AURA orchestration, provenance and safety.",
+  "goals": [
+    "Canonical Data-Cube ingestion",
+    "AURA planner/orchestration",
+    "Multi-engine analysis",
+    "Governance/audit",
+    "Plugin marketplace"
+  ],
+  "milestones": [
+    {
+      "id": "M1",
+      "title": "Core ingest & Data-Cube",
+      "acceptance": [
+        "/api/v1/ingestion/upload persists files to UPLOAD_DIR",
+        "Browser upload UI wired and working",
+        "Canonical asset records created and audited"
+      ]
+    },
+    {
+      "id": "M2",
+      "title": "AURA planner & orchestration",
+      "acceptance": [
+        "/aura/plan returns actionable plan",
+        "Engine jobs enqueued with provenance"
+      ]
+    },
+    {
+      "id": "M3",
+      "title": "Engines & Universal Analyst Test",
+      "acceptance": [
+        "document extraction, spectral, stylometry present",
+        "Universal Analyst Test passes"
+      ]
+    }
+  ],
+  "input_files": [
+    "uploads/deepseek_text_20260521_b34687.txt",
+    "uploads/deepseek_text_20260521_a1fa79.txt",
+    "uploads/deepseek_text_20260521_1f9965.txt",
+    "uploads/deepseek_text_20260521_3388f9.txt",
+    "uploads/deepseek_text_20260521_4fb1d1.txt",
+    "uploads/deepseek_text_20260521_6c4295.txt",
+    "uploads/deepseek_text_20260521_ffcd97.txt"
+  ],
+  "notes": "Enforce provenance and security. Use sandboxing for third-party plugins."
+}
