@@ -15,6 +15,12 @@ def create_app(config=None):
     app.config.setdefault('UPLOAD_DIR', default_upload)
     # RBAC: disabled by default for local/dev; enable in production/CI by setting this
     app.config.setdefault('RBAC_ENABLED', False)
+    # simple API key for upload endpoints (list or comma-separated keys)
+    app.config.setdefault('UPLOAD_API_KEY', None)
+    # upload hardening defaults
+    app.config.setdefault('UPLOAD_MAX_BYTES', 10 * 1024 * 1024)
+    app.config.setdefault('UPLOAD_ALLOWED_MIMETYPES', ['text/plain', 'application/json', 'text/csv', 'application/octet-stream'])
+    app.config.setdefault('UPLOAD_ALLOWED_EXTENSIONS', ['.txt', '.csv', '.json'])
 
     # apply test/override config
     if config:
@@ -25,13 +31,23 @@ def create_app(config=None):
         from .api.routes.ingestion import ingestion_bp, list_files, get_file, upload_file
         app.register_blueprint(ingestion_bp)
 
-        # lightweight job queue for orchestration stubs (in-memory for now)
-        app.jobs = []
+        # initialize job store: use in-memory store for TESTING, otherwise a persisted sqlite DB
+        from .core.job_store import JobStore
+        db_path = app.config.get('JOB_DB')
+        if not db_path:
+            base = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+            data_dir = os.path.join(base, 'data')
+            os.makedirs(data_dir, exist_ok=True)
+            db_path = os.path.join(data_dir, 'jobs.db')
 
-        # register aura blueprint (orchestration stub)
+        if app.config.get('TESTING', False):
+            app.job_store = JobStore(':memory:')
+        else:
+            app.job_store = JobStore(db_path)
+
+        # register aura blueprint (orchestration uses job_store)
         from .api.routes.aura import aura_bp, plan, process_next, job_status
         app.register_blueprint(aura_bp)
-        app.job_results = {}
 
         # Add API v1 aliases so both `/ingest/*` and `/api/v1/ingestion/*` work
         app.add_url_rule('/api/v1/ingestion/files', 'ingestion.list_files_v1', list_files, methods=['GET'])

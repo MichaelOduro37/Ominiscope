@@ -13,15 +13,18 @@ def plan():
     """
     payload = request.get_json(silent=True) or {}
     job_id = uuid.uuid4().hex
-    job = {'id': job_id, 'payload': payload, 'status': 'queued'}
+    # persist into the job store when available
+    store = getattr(current_app, 'job_store', None)
+    if store:
+        job_id = store.enqueue(payload)
+        return jsonify({'job_id': job_id, 'status': 'queued'}), 201
 
-    # append to in-memory job list on the app (if present)
+    # fallback to non-persistent in-memory queue
+    job = {'id': job_id, 'payload': payload, 'status': 'queued'}
     try:
         current_app.jobs.append(job)
     except Exception:
-        # ensure safe failure in environments without jobs list
         current_app.jobs = [job]
-
     return jsonify({'job_id': job_id, 'status': 'queued'}), 201
 
 
@@ -32,7 +35,15 @@ def process_next():
     Pops the first queued job, simulates processing, and stores a result
     in `current_app.job_results` keyed by job id.
     """
-    # find next queued job
+    # If a job store is configured, use it to process the next queued job
+    store = getattr(current_app, 'job_store', None)
+    if store:
+        result = store.process_next()
+        if result is None:
+            return jsonify({'message': 'no jobs queued'}), 204
+        return jsonify({'job_id': result.get('job_id'), 'status': 'done', 'result': result}), 200
+
+    # fallback to in-memory processing
     jobs = getattr(current_app, 'jobs', [])
     if not jobs:
         return jsonify({'message': 'no jobs queued'}), 204
@@ -63,6 +74,13 @@ def process_next():
 
 @aura_bp.route('/aura/jobs/<job_id>', methods=['GET'])
 def job_status(job_id):
+    store = getattr(current_app, 'job_store', None)
+    if store:
+        res = store.get_job(job_id)
+        if res is None:
+            return jsonify({'message': 'job not found'}), 404
+        return jsonify(res), 200
+
     results = getattr(current_app, 'job_results', {})
     if job_id not in results:
         return jsonify({'message': 'job not found'}), 404
