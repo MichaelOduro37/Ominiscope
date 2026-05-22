@@ -18,6 +18,7 @@ Thumbs.db
 
 # Bundles and archives
 *.bundle
+*.bundle.lock
 
 # Local secrets
 .env
