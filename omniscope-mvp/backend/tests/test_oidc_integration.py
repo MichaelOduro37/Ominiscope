@@ -1,6 +1,5 @@
 import json
 import threading
-import socket
 import base64
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
@@ -35,7 +34,7 @@ class JWKSHandler(BaseHTTPRequestHandler):
         super().__init__(*args, **kwargs)
 
     def do_GET(self):
-        if self.path.endswith("/jwks.json") or self.path.endswith(".well-known/jwks.json"):
+        if any(self.path.endswith(suffix) for suffix in ("/jwks.json", ".well-known/jwks.json")):
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
@@ -47,8 +46,6 @@ class JWKSHandler(BaseHTTPRequestHandler):
 
 def _run_jwks_server(jwks, host="127.0.0.1"):
     # pick a free port by binding to 0
-    httpd = None
-
     def handler(*args, **kwargs):
         JWKSHandler(jwks, *args, **kwargs)
 

@@ -17,11 +17,19 @@ class JobStore:
     def __init__(self, db_path):
         self.db_path = db_path
         self._lock = threading.Lock()
-        needs_init = db_path != ":memory:" and not os.path.exists(db_path)
-        self.conn = sqlite3.connect(db_path, check_same_thread=False)
+        self.conn = None
+        self._connect()
+
+    def _connect(self):
+        needs_init = self.db_path != ":memory:" and not os.path.exists(self.db_path)
+        self.conn = sqlite3.connect(self.db_path, check_same_thread=False)
         self.conn.row_factory = sqlite3.Row
-        if needs_init or db_path == ":memory:":
+        if needs_init or self.db_path == ":memory:":
             self._init_db()
+
+    def _ensure_conn(self):
+        if self.conn is None:
+            self._connect()
 
     def _init_db(self):
         cur = self.conn.cursor()
@@ -40,6 +48,7 @@ class JobStore:
         job_id = uuid.uuid4().hex
         now = datetime.now(timezone.utc).isoformat()
         with self._lock:
+            self._ensure_conn()
             cur = self.conn.cursor()
             cur.execute(
                 "INSERT INTO jobs (id, payload, status, result, created_at) VALUES (?, ?, ?, ?, ?)",
@@ -50,6 +59,7 @@ class JobStore:
 
     def process_next(self):
         with self._lock:
+            self._ensure_conn()
             cur = self.conn.cursor()
             cur.execute("BEGIN IMMEDIATE")
             cur.execute(
@@ -89,6 +99,7 @@ class JobStore:
 
     def get_job(self, job_id):
         with self._lock:
+            self._ensure_conn()
             cur = self.conn.cursor()
             cur.execute("SELECT * FROM jobs WHERE id = ?", (job_id,))
             row = cur.fetchone()
@@ -99,3 +110,9 @@ class JobStore:
                 "result": json.loads(row["result"]) if row["result"] else None,
             }
             return res
+
+    def close(self):
+        with self._lock:
+            if self.conn is not None:
+                self.conn.close()
+                self.conn = None

@@ -1,11 +1,16 @@
 import uuid
+from flask import Response
 from flask import Blueprint, request, jsonify, current_app
 
 aura_bp = Blueprint("aura", __name__)
 
 
+def _get_job_store():
+    return current_app.extensions.get("job_store")
+
+
 @aura_bp.route("/aura/plan", methods=["POST"])
-def plan():
+def plan() -> tuple[Response, int]:
     """Accept an orchestration plan request and enqueue a lightweight job.
 
     Returns a job id and queued status. This is a test-friendly stub used by
@@ -14,7 +19,7 @@ def plan():
     payload = request.get_json(silent=True) or {}
     job_id = uuid.uuid4().hex
     # persist into the job store when available
-    store = getattr(current_app, "job_store", None)
+    store = _get_job_store()
     if store:
         job_id = store.enqueue(payload)
         return jsonify({"job_id": job_id, "status": "queued"}), 201
@@ -29,18 +34,18 @@ def plan():
 
 
 @aura_bp.route("/aura/process", methods=["POST"])
-def process_next():
+def process_next() -> tuple[Response, int] | tuple[str, int]:
     """Process the next queued job synchronously (test stub).
 
     Pops the first queued job, simulates processing, and stores a result
     in `current_app.job_results` keyed by job id.
     """
     # If a job store is configured, use it to process the next queued job
-    store = getattr(current_app, "job_store", None)
+    store = _get_job_store()
     if store:
         result = store.process_next()
         if result is None:
-            return jsonify({"message": "no jobs queued"}), 204
+            return "", 204
         resp = jsonify(
             {
                 "job_id": result.get("job_id"),
@@ -53,7 +58,7 @@ def process_next():
     # fallback to in-memory processing
     jobs = getattr(current_app, "jobs", [])
     if not jobs:
-        return jsonify({"message": "no jobs queued"}), 204
+        return "", 204
 
     job = jobs.pop(0)
     job_id = job["id"]
@@ -86,8 +91,8 @@ def process_next():
 
 
 @aura_bp.route("/aura/jobs/<job_id>", methods=["GET"])
-def job_status(job_id):
-    store = getattr(current_app, "job_store", None)
+def job_status(job_id: str) -> tuple[Response, int]:
+    store = _get_job_store()
     if store:
         res = store.get_job(job_id)
         if res is None:

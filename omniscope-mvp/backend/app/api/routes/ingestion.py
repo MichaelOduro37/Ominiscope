@@ -13,6 +13,7 @@ import hmac
 import hashlib
 import json
 import time
+from flask import Response
 
 ingestion_bp = Blueprint("ingestion", __name__, url_prefix="/ingest")
 
@@ -32,7 +33,7 @@ def list_files():
 
 
 @ingestion_bp.route("/files/<path:filename>", methods=["GET"])
-def get_file(filename):
+def get_file(filename: str) -> Response:
     d = upload_dir()
     safe = secure_filename(filename)
     full = os.path.join(d, safe)
