@@ -2,6 +2,7 @@ import sqlite3
 import json
 import uuid
 import os
+import threading
 from datetime import datetime, timezone
 
 
@@ -15,6 +16,7 @@ class JobStore:
 
     def __init__(self, db_path):
         self.db_path = db_path
+        self._lock = threading.Lock()
         needs_init = db_path != ":memory:" and not os.path.exists(db_path)
         self.conn = sqlite3.connect(db_path, check_same_thread=False)
         self.conn.row_factory = sqlite3.Row
@@ -37,64 +39,63 @@ class JobStore:
     def enqueue(self, payload):
         job_id = uuid.uuid4().hex
         now = datetime.now(timezone.utc).isoformat()
-        cur = self.conn.cursor()
-        cur.execute(
-            (
-                "INSERT INTO jobs (id, payload, status, result, created_at) "
-                "VALUES (?, ?, ?, ?, ?)"
-            ),
-            (job_id, json.dumps(payload), "queued", None, now),
-        )
-        self.conn.commit()
+        with self._lock:
+            cur = self.conn.cursor()
+            cur.execute(
+                "INSERT INTO jobs (id, payload, status, result, created_at) VALUES (?, ?, ?, ?, ?)",
+                (job_id, json.dumps(payload), "queued", None, now),
+            )
+            self.conn.commit()
         return job_id
 
     def process_next(self):
-        cur = self.conn.cursor()
-        cur.execute(
-            "SELECT * FROM jobs WHERE status = 'queued' " "ORDER BY created_at LIMIT 1"
-        )
-        row = cur.fetchone()
-        if not row:
-            return None
-        job_id = row["id"]
-        payload = json.loads(row["payload"] or "{}")
+        with self._lock:
+            cur = self.conn.cursor()
+            cur.execute("BEGIN IMMEDIATE")
+            cur.execute(
+                "SELECT * FROM jobs WHERE status = 'queued' ORDER BY created_at LIMIT 1"
+            )
+            row = cur.fetchone()
+            if not row:
+                self.conn.rollback()
+                return None
+            job_id = row["id"]
+            payload = json.loads(row["payload"] or "{}")
 
-        # mark processing
-        cur.execute(
-            "UPDATE jobs SET status = ? WHERE id = ?",
-            ("processing", job_id),
-        )
-        self.conn.commit()
+            cur.execute(
+                "UPDATE jobs SET status = ? WHERE id = ?",
+                ("processing", job_id),
+            )
 
-        # simulate processing result (same shape as previous stub)
-        result = {
-            "job_id": job_id,
-            "summary": f"Processed {len(payload.get('inputs', []))} inputs",
-            "findings": [
-                {
-                    "engine_id": "mock-engine-1",
-                    "confidence": 0.92,
-                    "output": "sample finding",
-                }
-            ],
-        }
+            # simulate processing result (same shape as previous stub)
+            result = {
+                "job_id": job_id,
+                "summary": f"Processed {len(payload.get('inputs', []))} inputs",
+                "findings": [
+                    {
+                        "engine_id": "mock-engine-1",
+                        "confidence": 0.92,
+                        "output": "sample finding",
+                    }
+                ],
+            }
 
-        # store result
-        cur.execute(
-            "UPDATE jobs SET status = ?, result = ? WHERE id = ?",
-            ("done", json.dumps(result), job_id),
-        )
-        self.conn.commit()
-        return result
+            cur.execute(
+                "UPDATE jobs SET status = ?, result = ? WHERE id = ?",
+                ("done", json.dumps(result), job_id),
+            )
+            self.conn.commit()
+            return result
 
     def get_job(self, job_id):
-        cur = self.conn.cursor()
-        cur.execute("SELECT * FROM jobs WHERE id = ?", (job_id,))
-        row = cur.fetchone()
-        if not row:
-            return None
-        res = {
-            "status": row["status"],
-            "result": json.loads(row["result"]) if row["result"] else None,
-        }
-        return res
+        with self._lock:
+            cur = self.conn.cursor()
+            cur.execute("SELECT * FROM jobs WHERE id = ?", (job_id,))
+            row = cur.fetchone()
+            if not row:
+                return None
+            res = {
+                "status": row["status"],
+                "result": json.loads(row["result"]) if row["result"] else None,
+            }
+            return res

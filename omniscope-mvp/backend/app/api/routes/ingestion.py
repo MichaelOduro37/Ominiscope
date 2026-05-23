@@ -41,80 +41,94 @@ def get_file(filename):
     return send_from_directory(d, safe, as_attachment=False)
 
 
+def _verify_upload_bearer_token(token: str):
+    payload = _verify_upload_jwks_token(token)
+    if payload is not None:
+        return payload
+    return _verify_upload_hs256_token(token)
+
+
+def _verify_upload_jwks_token(token: str):
+    jwks_url = current_app.config.get("UPLOAD_JWT_JWKS_URL")
+    if not jwks_url:
+        return None
+    try:
+        from app.auth.oidc import verify_jwt_via_jwks
+
+        audience = current_app.config.get("UPLOAD_JWT_AUDIENCE")
+        return verify_jwt_via_jwks(token, jwks_url, audience=audience)
+    except Exception:
+        return None
+
+
+def _verify_upload_hs256_token(token: str):
+    jwt_secret = current_app.config.get("UPLOAD_JWT_SECRET")
+    if not jwt_secret:
+        return None
+    try:
+        return _verify_jwt_hs256(token, jwt_secret)
+    except Exception:
+        return None
+
+
+def _is_upload_rbac_enabled():
+    return current_app.config.get("RBAC_ENABLED", False) and not current_app.config.get(
+        "TESTING", False
+    )
+
+
+def _is_valid_upload_api_key():
+    expected = current_app.config.get("UPLOAD_API_KEY")
+    if not expected:
+        return False
+    api_key = request.headers.get("X-API-Key")
+    valid_keys = [k.strip() for k in expected.split(",") if k.strip()]
+    return bool(api_key and api_key in valid_keys)
+
+
+def _authorize_bearer_upload():
+    auth = request.headers.get("Authorization", "")
+    if not auth or not auth.lower().startswith("bearer "):
+        return None
+    token = auth.split(None, 1)[1].strip()
+    payload = _verify_upload_bearer_token(token)
+    if not payload or not _jwt_allows_upload(payload):
+        return jsonify({"error": "forbidden"}), 403
+    return None
+
+
+def _authorize_technician_upload():
+    role = request.headers.get("X-Role", "")
+    if role != "Technician":
+        return jsonify({"error": "forbidden"}), 403
+    return None
+
+
+def _authorize_upload_request():
+    if not _is_upload_rbac_enabled():
+        return None
+    if _is_valid_upload_api_key():
+        return None
+
+    auth = request.headers.get("Authorization", "")
+    if auth and auth.lower().startswith("bearer "):
+        bearer_error = _authorize_bearer_upload()
+        if bearer_error is not None:
+            return bearer_error
+        return None
+
+    bearer_error = _authorize_bearer_upload()
+    if bearer_error is not None:
+        return bearer_error
+
+    return _authorize_technician_upload()
+
+
 @ingestion_bp.route("/upload", methods=["POST"])
 def upload_file():
-    # Authorization: if RBAC is enabled and not TESTING, require a valid API key
-    if current_app.config.get("RBAC_ENABLED", False) and not current_app.config.get(
-        "TESTING", False
-    ):
-        # Prefer API key auth; allow X-Role Technician for backward compatibility.
-        api_key = request.headers.get("X-API-Key")
-        expected = current_app.config.get("UPLOAD_API_KEY")
-        if expected:
-            # support comma-separated keys
-            valid_keys = [k.strip() for k in expected.split(",") if k.strip()]
-            if api_key and api_key in valid_keys:
-                # valid API key provided
-                pass
-            else:
-                # if API key missing/invalid, allow Bearer JWT when configured
-                auth = request.headers.get("Authorization", "")
-                # Prefer JWKS/OIDC verification when configured
-                jwks_url = current_app.config.get("UPLOAD_JWT_JWKS_URL")
-                jwt_secret = current_app.config.get("UPLOAD_JWT_SECRET")
-                if auth and auth.lower().startswith("bearer "):
-                    token = auth.split(None, 1)[1].strip()
-                    payload = None
-                    # Try JWKS first (RS256) if configured
-                    if jwks_url:
-                        try:
-                            from app.auth.oidc import verify_jwt_via_jwks
-
-                            audience = current_app.config.get("UPLOAD_JWT_AUDIENCE")
-                            payload = verify_jwt_via_jwks(token, jwks_url, audience=audience)
-                        except Exception:
-                            payload = None
-                    # Fall back to minimal HS256 verifier for test/dev tokens
-                    if payload is None and jwt_secret:
-                        try:
-                            payload = _verify_jwt_hs256(token, jwt_secret)
-                        except Exception:
-                            payload = None
-                    if not payload or not _jwt_allows_upload(payload):
-                        return jsonify({"error": "forbidden"}), 403
-                else:
-                    # Fallback: allow only Technician when no API key/JWT is configured.
-                    role = request.headers.get("X-Role", "")
-                    if role != "Technician":
-                        return jsonify({"error": "forbidden"}), 403
-        else:
-            # try Bearer JWT auth if configured
-            auth = request.headers.get("Authorization", "")
-            jwt_secret = current_app.config.get("UPLOAD_JWT_SECRET")
-            jwks_url = current_app.config.get("UPLOAD_JWT_JWKS_URL")
-            if auth and auth.lower().startswith("bearer "):
-                token = auth.split(None, 1)[1].strip()
-                payload = None
-                if jwks_url:
-                    try:
-                        from app.auth.oidc import verify_jwt_via_jwks
-
-                        audience = current_app.config.get("UPLOAD_JWT_AUDIENCE")
-                        payload = verify_jwt_via_jwks(token, jwks_url, audience=audience)
-                    except Exception:
-                        payload = None
-                if payload is None and jwt_secret:
-                    try:
-                        payload = _verify_jwt_hs256(token, jwt_secret)
-                    except Exception:
-                        payload = None
-                if not payload or not _jwt_allows_upload(payload):
-                    return jsonify({"error": "forbidden"}), 403
-            else:
-                # fallback: allow only Technician role when no API key or jwt configured
-                role = request.headers.get("X-Role", "")
-                if role != "Technician":
-                    return jsonify({"error": "forbidden"}), 403
+    auth_error = _authorize_upload_request()
+    if auth_error is not None:
+        return auth_error
 
     # quick size check from the request headers when available
     max_bytes = current_app.config.get("UPLOAD_MAX_BYTES")
