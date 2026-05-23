@@ -59,15 +59,26 @@ def upload_file():
             else:
                 # if API key missing/invalid, allow Bearer JWT when configured
                 auth = request.headers.get("Authorization", "")
+                # Prefer JWKS/OIDC verification when configured
+                jwks_url = current_app.config.get("UPLOAD_JWT_JWKS_URL")
                 jwt_secret = current_app.config.get("UPLOAD_JWT_SECRET")
-                if auth and auth.lower().startswith("bearer ") and jwt_secret:
-                    # extract token portion after "Bearer"
+                if auth and auth.lower().startswith("bearer "):
                     token = auth.split(None, 1)[1].strip()
                     payload = None
-                    try:
-                        payload = _verify_jwt_hs256(token, jwt_secret)
-                    except Exception:
-                        payload = None
+                    # Try JWKS first (RS256) if configured
+                    if jwks_url:
+                        try:
+                            from app.auth.oidc import verify_jwt_via_jwks
+
+                            payload = verify_jwt_via_jwks(token, jwks_url)
+                        except Exception:
+                            payload = None
+                    # Fall back to minimal HS256 verifier for test/dev tokens
+                    if payload is None and jwt_secret:
+                        try:
+                            payload = _verify_jwt_hs256(token, jwt_secret)
+                        except Exception:
+                            payload = None
                     if not payload or not _jwt_allows_upload(payload):
                         return jsonify({"error": "forbidden"}), 403
                 else:
@@ -79,13 +90,22 @@ def upload_file():
             # try Bearer JWT auth if configured
             auth = request.headers.get("Authorization", "")
             jwt_secret = current_app.config.get("UPLOAD_JWT_SECRET")
-            if auth and auth.lower().startswith("bearer ") and jwt_secret:
+            jwks_url = current_app.config.get("UPLOAD_JWT_JWKS_URL")
+            if auth and auth.lower().startswith("bearer "):
                 token = auth.split(None, 1)[1].strip()
                 payload = None
-                try:
-                    payload = _verify_jwt_hs256(token, jwt_secret)
-                except Exception:
-                    payload = None
+                if jwks_url:
+                    try:
+                        from app.auth.oidc import verify_jwt_via_jwks
+
+                        payload = verify_jwt_via_jwks(token, jwks_url)
+                    except Exception:
+                        payload = None
+                if payload is None and jwt_secret:
+                    try:
+                        payload = _verify_jwt_hs256(token, jwt_secret)
+                    except Exception:
+                        payload = None
                 if not payload or not _jwt_allows_upload(payload):
                     return jsonify({"error": "forbidden"}), 403
             else:
