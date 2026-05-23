@@ -2,7 +2,7 @@ import sqlite3
 import json
 import uuid
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class JobStore:
@@ -38,7 +38,7 @@ class JobStore:
 
     def enqueue(self, payload):
         job_id = uuid.uuid4().hex
-        now = datetime.utcnow().isoformat() + 'Z'
+        now = datetime.now(timezone.utc).isoformat()
         cur = self.conn.cursor()
         cur.execute(
             "INSERT INTO jobs (id, payload, status, result, created_at) VALUES (?, ?, ?, ?, ?)",

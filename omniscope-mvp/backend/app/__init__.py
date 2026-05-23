@@ -49,6 +49,15 @@ def create_app(config=None):
         from .api.routes.aura import aura_bp, plan, process_next, job_status
         app.register_blueprint(aura_bp)
 
+        # register auth/token issuer blueprint
+        try:
+            from .api.routes.auth import auth_bp, issue_token
+            app.register_blueprint(auth_bp)
+            app.add_url_rule('/api/v1/auth/token', 'auth.issue_token_v1', issue_token, methods=['POST'])
+        except Exception:
+            # token issuer optional; surface errors normally
+            raise
+
         # Add API v1 aliases so both `/ingest/*` and `/api/v1/ingestion/*` work
         app.add_url_rule('/api/v1/ingestion/files', 'ingestion.list_files_v1', list_files, methods=['GET'])
         app.add_url_rule('/api/v1/ingestion/files/<path:filename>', 'ingestion.get_file_v1', get_file, methods=['GET'])
