@@ -22,3 +22,5 @@ Thumbs.db
 
 # Local secrets
 .env
+omniscope-mvp/backend/data/
+omniscope-mvp/data/
