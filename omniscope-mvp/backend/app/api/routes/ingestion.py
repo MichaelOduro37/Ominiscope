@@ -70,7 +70,8 @@ def upload_file():
                         try:
                             from app.auth.oidc import verify_jwt_via_jwks
 
-                            payload = verify_jwt_via_jwks(token, jwks_url)
+                            audience = current_app.config.get("UPLOAD_JWT_AUDIENCE")
+                            payload = verify_jwt_via_jwks(token, jwks_url, audience=audience)
                         except Exception:
                             payload = None
                     # Fall back to minimal HS256 verifier for test/dev tokens
@@ -98,7 +99,8 @@ def upload_file():
                     try:
                         from app.auth.oidc import verify_jwt_via_jwks
 
-                        payload = verify_jwt_via_jwks(token, jwks_url)
+                        audience = current_app.config.get("UPLOAD_JWT_AUDIENCE")
+                        payload = verify_jwt_via_jwks(token, jwks_url, audience=audience)
                     except Exception:
                         payload = None
                 if payload is None and jwt_secret:
