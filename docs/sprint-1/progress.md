@@ -8,6 +8,8 @@
 - 2026-05-26: Phase 2 complete - AURA orchestration API, pipeline lifecycle, error model.
 - 2026-05-26: Phase 3 started.
 - 2026-05-26: Phase 3 complete - plugin runtime contract and sandbox policy.
+- 2026-05-26: Phase 4 started.
+- 2026-05-26: Phase 4 complete - UI IA and report structure.
 
 Open Items
 - GitHub issues check pending (no access).
