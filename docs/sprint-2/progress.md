@@ -6,6 +6,8 @@
 - 2026-05-26: Phase 1 complete - backend skeleton scaffolding.
 - 2026-05-26: Phase 2 started.
 - 2026-05-26: Phase 2 complete - SQLAlchemy models and Alembic stubs.
+- 2026-05-26: Phase 3 started.
+- 2026-05-26: Phase 3 complete - worker skeleton and job contracts.
 
 Open Items
 - Decide local dev stack for database and storage.
