@@ -17,3 +17,4 @@
 Open Items
 - GitHub issues check pending (no access).
 - Internal data source list pending.
+ - Sprint 1 closed and handed off to Sprint 2.
