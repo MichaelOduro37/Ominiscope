@@ -8,6 +8,8 @@
 - 2026-05-26: Phase 2 complete - SQLAlchemy models and Alembic stubs.
 - 2026-05-26: Phase 3 started.
 - 2026-05-26: Phase 3 complete - worker skeleton and job contracts.
+- 2026-05-26: Phase 4 started.
+- 2026-05-26: Phase 4 complete - frontend shell with core routes.
 
 Open Items
 - Decide local dev stack for database and storage.
