@@ -12,6 +12,7 @@
 - 2026-05-26: Phase 4 complete - UI IA and report structure.
 - 2026-05-26: Phase 5 started.
 - 2026-05-26: Phase 5 complete - RBAC/ABAC baseline and audit events.
+- 2026-05-26: Sprint 1 complete - foundation docs finalized.
 
 Open Items
 - GitHub issues check pending (no access).

@@ -42,6 +42,9 @@ OmniScope is the internal universal analysis operating system for the company. I
 - Trust and adoption: explainability, approvals, and audit trails.
 - Integration complexity: staged connectors and legacy ingest wizard.
 - Data sensitivity: RBAC/ABAC, masking, and customer-managed keys.
+- Ingestion ambiguity: data cube schema and metadata taxonomy defined in Sprint 1.
+- Extension safety: plugin runtime contract and sandbox policy defined in Sprint 1.
+- UX confusion: UI IA and report structure defined in Sprint 1.
 
 ## 8. Success Metrics
 - 3 teams completing real workflows in OmniScope within 30 days of rollout.
@@ -49,6 +52,7 @@ OmniScope is the internal universal analysis operating system for the company. I
 - 10 reusable pipeline templates by end of month 3.
 - Zero critical findings in internal security review.
 - Positive adoption feedback from each role group.
+- Sprint 1 checkpoint achieved: core foundation specs documented and reviewed.
 
 ## 9. Roadmap (High Level)
 - Phase 0: foundation docs, architecture, and data model.
