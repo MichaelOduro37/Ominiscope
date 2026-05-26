@@ -45,6 +45,7 @@ OmniScope is the internal universal analysis operating system for the company. I
 - Ingestion ambiguity: data cube schema and metadata taxonomy defined in Sprint 1.
 - Extension safety: plugin runtime contract and sandbox policy defined in Sprint 1.
 - UX confusion: UI IA and report structure defined in Sprint 1.
+- Integration gaps: Sprint 2 scaffolding complete; Sprint 3 wiring planned.
 
 ## 8. Success Metrics
 - 3 teams completing real workflows in OmniScope within 30 days of rollout.
@@ -53,6 +54,7 @@ OmniScope is the internal universal analysis operating system for the company. I
 - Zero critical findings in internal security review.
 - Positive adoption feedback from each role group.
 - Sprint 1 checkpoint achieved: core foundation specs documented and reviewed.
+- Sprint 2 checkpoint achieved: API, worker, and web skeletons delivered.
 
 ## 9. Roadmap (High Level)
 - Phase 0: foundation docs, architecture, and data model.

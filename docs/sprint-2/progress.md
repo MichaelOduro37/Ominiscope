@@ -10,6 +10,8 @@
 - 2026-05-26: Phase 3 complete - worker skeleton and job contracts.
 - 2026-05-26: Phase 4 started.
 - 2026-05-26: Phase 4 complete - frontend shell with core routes.
+- 2026-05-26: Sprint 2 complete - scaffolding delivered.
 
 Open Items
 - Decide local dev stack for database and storage.
+- Sprint 2 closed and handed off to Sprint 3.
