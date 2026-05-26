@@ -4,6 +4,8 @@
 - 2026-05-26: Phase 0 complete - architecture baseline documented.
 - 2026-05-26: Phase 1 started.
 - 2026-05-26: Phase 1 complete - backend skeleton scaffolding.
+- 2026-05-26: Phase 2 started.
+- 2026-05-26: Phase 2 complete - SQLAlchemy models and Alembic stubs.
 
 Open Items
 - Decide local dev stack for database and storage.
