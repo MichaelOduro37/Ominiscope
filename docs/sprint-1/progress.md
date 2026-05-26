@@ -10,6 +10,8 @@
 - 2026-05-26: Phase 3 complete - plugin runtime contract and sandbox policy.
 - 2026-05-26: Phase 4 started.
 - 2026-05-26: Phase 4 complete - UI IA and report structure.
+- 2026-05-26: Phase 5 started.
+- 2026-05-26: Phase 5 complete - RBAC/ABAC baseline and audit events.
 
 Open Items
 - GitHub issues check pending (no access).
