@@ -22,3 +22,4 @@ class OrchestrationResponse(BaseModel):
     pipeline_id: str
     status: str
     next_action: str
+    job_id: Optional[str] = None

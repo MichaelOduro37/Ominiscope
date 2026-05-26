@@ -1,11 +1,12 @@
 import uuid
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.db import models
 from app.db.deps import get_db
 from app.schemas.aura import OrchestrationRequest, OrchestrationResponse
+from app.worker_queue import enqueue_job
 
 router = APIRouter()
 
@@ -23,9 +24,24 @@ def create_orchestration(
     db.add(pipeline)
     db.commit()
     db.refresh(pipeline)
+
+    try:
+        job_id = enqueue_job(
+            "app.jobs.pipeline.pipeline_job",
+            {"pipeline_id": pipeline.id},
+        )
+    except Exception as exc:
+        pipeline.status = "failed"
+        db.commit()
+        raise HTTPException(status_code=503, detail="Worker queue unavailable") from exc
+
+    pipeline.job_id = job_id
+    db.commit()
+    db.refresh(pipeline)
     return OrchestrationResponse(
         orchestration_id=orchestration_id,
         pipeline_id=pipeline.id,
         status=pipeline.status,
         next_action="none",
+        job_id=job_id,
     )

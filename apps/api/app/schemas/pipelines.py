@@ -9,6 +9,7 @@ class PipelineRunOut(BaseModel):
 
     id: str
     orchestration_id: Optional[str] = None
+    job_id: Optional[str] = None
     status: str
     created_at: datetime.datetime
     updated_at: datetime.datetime

@@ -13,3 +13,4 @@ class IngestResponse(BaseModel):
     asset_id: str
     version_id: str
     cube_id: str
+    job_id: Optional[str] = None

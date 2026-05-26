@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.db import models
 from app.db.deps import get_db
 from app.schemas.ingestion import IngestRequest, IngestResponse
+from app.worker_queue import enqueue_job
 
 router = APIRouter()
 
@@ -44,8 +45,26 @@ def ingest(payload: IngestRequest, db: Session = Depends(get_db)) -> IngestRespo
     db.refresh(asset)
     db.refresh(version)
     db.refresh(cube)
+
+    try:
+        job_id = enqueue_job(
+            "app.jobs.ingest.ingest_job",
+            {
+                "asset_id": asset.id,
+                "version_id": version.id,
+                "cube_id": cube.id,
+            },
+        )
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(status_code=503, detail="Worker queue unavailable") from exc
+
+    version.job_id = job_id
+    db.commit()
+    db.refresh(version)
     return IngestResponse(
         asset_id=asset.id,
         version_id=version.id,
         cube_id=cube.id,
+        job_id=job_id,
     )

@@ -50,6 +50,7 @@ class DataVersion(Base):
     ingested_by: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     mime_type: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
     format: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    job_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
 
     asset: Mapped[DataAsset] = relationship("DataAsset", back_populates="versions")
     cubes: Mapped[list[DataCube]] = relationship(
@@ -81,6 +82,7 @@ class PipelineRun(Base):
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_id)
     orchestration_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    job_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     status: Mapped[str] = mapped_column(String(32), default="queued")
     created_at: Mapped[datetime.datetime] = mapped_column(
         DateTime, default=datetime.datetime.utcnow
